@@ -1,4 +1,5 @@
 const synth = new Tone.Synth().toMaster();
+const partner = new Tone.Synth().toMaster();
 const polySynth = new Tone.PolySynth(7, Tone.Synth).toMaster();
 const notes = ["C", "C#", "D", "Eb", "E", "N/A", "F", "F#", "G", "Ab", "A", "Bb", "B", "N/A",]
 // in progress
@@ -24,10 +25,32 @@ let startTime;
 let importedFile;
 let eventFired = false;
 
+const ID = '_' + Math.random().toString(36).substr(2, 9);
+
+let socket;
+
+try {
+    socket = io();
+} catch(err) {
+    console.log(err);
+}
+
+if (socket) {
+    socket.on("keydown", (msg) => {
+        if (msg.sender !== ID) {
+            partner.triggerAttack(msg.note);
+        }
+    });
+    socket.on("keyup", (msg) => {
+        if (msg.sender !== ID) {
+            partner.triggerRelease();
+        }
+    });    
+}
+
 document.onkeydown = function(e) {
     if (!keysDownMap[e.which]) {
         let note = keyCodes[e.which];
-        console.log(note);
         keysDownMap[e.which] = true;
         if (note) {
             polySynth.triggerAttack([note]);
@@ -110,6 +133,12 @@ function playKey(key, octave, play) {
         if (started) {
             startTime = time;
         }
+        if (socket) {
+            socket.emit('keydown', {
+                note: key + octave,
+                sender: ID
+            });
+        }
         synth.triggerAttack(key + octave);
     } else {
         if (started) {
@@ -119,6 +148,12 @@ function playKey(key, octave, play) {
                 duration: time - startTime
             });
             startTime = null;
+        }
+        if (socket) {
+            socket.emit('keyup', {
+                note: key + octave,
+                sender: ID
+            });
         }
         synth.triggerRelease();
     }
