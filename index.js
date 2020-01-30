@@ -3,7 +3,7 @@ const polySynth = new Tone.PolySynth(7, Tone.Synth).toMaster();
 const notes = ["C", "C#", "D", "Eb", "E", "N/A", "F", "F#", "G", "Ab", "A", "Bb", "B", "N/A",]
 // in progress
 const keyCodes = {
-    "90": "zxc",
+    "90": "C4",
     "88": "C#4",
     "67": "D4",
     "86": "D#4",
