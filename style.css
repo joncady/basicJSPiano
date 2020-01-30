@@ -1,0 +1,33 @@
+#keys {
+    display: flex;
+    height: 200px;
+}
+
+.white-key {
+    height: 200px;
+    width: 40px;
+    background-color: white;
+    border: 3px solid black;
+}
+
+.black-key {
+    height: 150px;
+    width: 30px;
+    background-color: black;
+}
+
+#save {
+    display: none;
+}
+
+#controls {
+    margin: 1em;
+}
+
+#info-area {
+    margin: 1em;
+}
+
+#timer {
+    margin: 1em;
+}
