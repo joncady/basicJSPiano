@@ -72,6 +72,22 @@ let gpNotes = {
     }
 };
 
+let drumsPlaying = {}
+
+function playDrums(keys) {
+    keys.forEach((drum, i) => {
+        if (drum && !drumsPlaying[i]) {
+            const audio = document.querySelector(`audio[data-key="${i}"]`);
+            if(!audio) return;
+            audio.currentTime = 0;
+            audio.play();
+            drumsPlaying[i] = true;
+        } else if (!drum && drumsPlaying[i]) {
+            drumsPlaying[i] = false;
+        }
+    });
+}
+
 function gamepadPlay(gp) {
     let buttons = gp.buttons;
     let [lX, lY, rX, rY] = gp.axes.map(Math.round);
@@ -79,6 +95,13 @@ function gamepadPlay(gp) {
     let combinedR = String(rX + "," + rY);
     let noteToPlayL = gpNotes.L[combinedL];
     let noteToPlayR = gpNotes.R[combinedR];
+    let A = buttons[0];
+    let B = buttons[1];
+    let X = buttons[2];
+    let Y = buttons[3];
+    let drums = [A.pressed, B.pressed, X.pressed, Y.pressed];
+    playDrums(drums);
+
     if (noteToPlayL && buttons[6].pressed) {
         noteToPlayL += "b";
     } else if (noteToPlayL && buttons[7].pressed) {
