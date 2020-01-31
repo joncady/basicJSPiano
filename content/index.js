@@ -24,6 +24,7 @@ let timeEl;
 let startTime;
 let importedFile;
 let eventFired = false;
+let gamepadLoop;
 
 const ID = '_' + Math.random().toString(36).substr(2, 9);
 
@@ -31,7 +32,7 @@ let socket;
 
 try {
     socket = io();
-} catch(err) {
+} catch (err) {
     console.log(err);
 }
 
@@ -45,10 +46,75 @@ if (socket) {
         if (msg.sender !== ID) {
             partner.triggerRelease();
         }
-    });    
+    });
 }
 
-document.onkeydown = function(e) {
+
+window.addEventListener("gamepadconnected", function(e) {
+    let gpIndex = e.gamepad.index;
+    gamepadLoop = setInterval(() => gamepadPlay(navigator.getGamepads()[gpIndex]), 10);
+});
+
+let lastNoteL;
+let lastNoteR;
+let gpNotes = {
+    "L": {
+        "0,1": "C",
+        "-1,0": "D",
+        "0,-1": "E",
+        "1,0": "F"
+    },
+    "R": {
+        "0,1": "G",
+        "-1,0": "A",
+        "0,-1": "B",
+        "1,0": "C"
+    }
+};
+
+function gamepadPlay(gp) {
+    let buttons = gp.buttons;
+    let [lX, lY, rX, rY] = gp.axes.map(Math.round);
+    let combinedL = String(lX + "," + lY);
+    let combinedR = String(rX + "," + rY);
+    let noteToPlayL = gpNotes.L[combinedL];
+    let noteToPlayR = gpNotes.R[combinedR];
+    if (noteToPlayL && buttons[6].pressed) {
+        noteToPlayL += "b";
+    } else if (noteToPlayL && buttons[7].pressed) {
+        noteToPlayL += "#";
+    }
+    if (noteToPlayR && buttons[6].pressed) {
+        noteToPlayR += "b";
+    } else if (noteToPlayR && buttons[7].pressed) {
+        noteToPlayR += "#";
+    }
+    if (combinedL == "0,0" && lastNoteL) {
+        lastNoteL = null;
+        synth.triggerRelease();
+    } else if (combinedR == "0,0" && lastNoteR) {
+        lastNoteR = null;
+        synth.triggerRelease();
+    }
+    if (noteToPlayL) {
+        if (noteToPlayL != lastNoteL) {
+            synth.triggerRelease();
+            lastNoteL = noteToPlayL;
+            lastNoteR = null;
+            synth.triggerAttack(noteToPlayL + "4");
+        }
+    } else if (noteToPlayR) {
+        if (noteToPlayR != lastNoteR) {
+            synth.triggerRelease();
+            lastNoteR = noteToPlayR;
+            lastNoteL = null;
+            synth.triggerAttackRelease(noteToPlayR + (noteToPlayR === "C" ? "5": "4"));
+        }
+    }
+
+}
+
+document.onkeydown = function (e) {
     if (!keysDownMap[e.which]) {
         let note = keyCodes[e.which];
         keysDownMap[e.which] = true;
@@ -58,7 +124,7 @@ document.onkeydown = function(e) {
     }
 }
 
-document.onkeyup = function(e) {
+document.onkeyup = function (e) {
     let note = keyCodes[e.which];
     keysDownMap[e.which] = false;
     polySynth.triggerRelease([note]);
@@ -96,7 +162,6 @@ function readyListeners() {
     });
     timerEl = document.getElementById("timer");
 }
-
 
 function createKeys() {
     let keys = document.getElementById("keys");
