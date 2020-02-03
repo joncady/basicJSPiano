@@ -11,14 +11,29 @@ app.get('/', function(req, res){
 });
 
 io.on('connection', function(socket){
-  console.log('a user connected');
+
+  socket.on("join", (msg) => {
+    socket.join(msg.room);
+  });
+
+  socket.on("leave", (msg) => {
+    socket.leave(msg.room);
+  });
 
   socket.on("keydown", (msg) => {
-    io.emit("keydown", msg);
+    if (msg.room) {
+      io.to(msg.room).emit("keydown", msg);
+    } else {
+      io.emit("keydown", msg);
+    }
   });
 
   socket.on("keyup", (msg) => {
-    io.emit("keyup", msg);
+    if (msg.room) {
+      io.to(msg.room).emit("keyup", msg);
+    } else {
+      io.emit("keyup", msg);
+    }
   });
 });
 

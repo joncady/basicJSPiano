@@ -25,6 +25,7 @@ let startTime;
 let importedFile;
 let eventFired = false;
 let gamepadLoop;
+let room = null;
 
 const ID = '_' + Math.random().toString(36).substr(2, 9);
 
@@ -184,6 +185,11 @@ function readyListeners() {
         }
     });
     timerEl = document.getElementById("timer");
+    document.querySelector("#join-room").addEventListener("click", () => {
+        room = document.querySelector("#room-name").value;
+        document.querySelector("#room").textContent = room;
+        socket.emit("join", { room: room });
+    });
 }
 
 function createKeys() {
@@ -224,7 +230,8 @@ function playKey(key, octave, play) {
         if (socket) {
             socket.emit('keydown', {
                 note: key + octave,
-                sender: ID
+                sender: ID,
+                room: room
             });
         }
         synth.triggerAttack(key + octave);
@@ -240,7 +247,8 @@ function playKey(key, octave, play) {
         if (socket) {
             socket.emit('keyup', {
                 note: key + octave,
-                sender: ID
+                sender: ID,
+                room: room
             });
         }
         synth.triggerRelease();
