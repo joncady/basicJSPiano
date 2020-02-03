@@ -41,11 +41,13 @@ if (socket) {
     socket.on("keydown", (msg) => {
         if (msg.sender !== ID) {
             partner.triggerAttack(msg.note);
+            document.querySelector(`#${msg.note.replace("#", "-")}`).classList.add("partner-pressed");
         }
     });
     socket.on("keyup", (msg) => {
         if (msg.sender !== ID) {
             partner.triggerRelease();
+            document.querySelector(`#${msg.note.replace("#", "-")}`).classList.remove("partner-pressed");
         }
     });
 }
@@ -207,6 +209,7 @@ function createKeys() {
                 key.addEventListener("mousedown", () => playKey(note, octave, true));
                 key.addEventListener("mouseup", () => playKey(note, octave, false));
                 key.addEventListener("mouseout", () => synth.triggerRelease());
+                key.id = (note + octave).replace("#", "-");
 
                 // key.addEventListener("mousedown", () => playChord(i, octave, false));
                 // key.addEventListener("mouseup", () => playChord(i, octave, true));
@@ -235,6 +238,7 @@ function playKey(key, octave, play) {
             });
         }
         synth.triggerAttack(key + octave);
+        document.querySelector("#" + (key + octave).replace("#", "-")).classList.add("pressed");
     } else {
         if (started) {
             recordNotes.push({
@@ -252,6 +256,7 @@ function playKey(key, octave, play) {
             });
         }
         synth.triggerRelease();
+        document.querySelector("#" + (key + octave).replace("#", "-")).classList.remove("pressed");
     }
 }
 

@@ -31,3 +31,15 @@
 #timer {
     margin: 1em;
 }
+
+.pressed {
+    background-color: red;
+}
+
+.partner-pressed {
+    background-color: blue;
+}
+
+.partner-pressed.pressed {
+    background-color: purple;
+}
